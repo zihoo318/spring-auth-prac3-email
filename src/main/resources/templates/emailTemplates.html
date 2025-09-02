@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>이메일 인증 코드</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:24px;background:#f7f7f8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7f8;padding:24px 0;">
+    <tr>
+        <td align="center">
+            <!-- 메인 컨테이너 -->
+            <table width="100%" style="max-width:600px;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden;">
+
+                        <!-- 헤더 영역 -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="background:#111827;padding:24px;text-align:center;">
+                                    <div style="width:64px;height:64px;background:#ffffff;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="color:#111827;">
+                                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:600;">
+                                        이메일 인증 코드
+                                    </h1>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 메인 콘텐츠 -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="padding:32px;">
+
+                                    <!-- 인사말 -->
+                                    <div style="margin-bottom:24px;">
+                                        <p style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111827;">
+                                            안녕하세요.
+                                        </p>
+                                        <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
+                                            <strong style="color:#111827;" th:text="${appName}">이메일 인증 테스트</strong> 가입을 위한 인증 코드입니다.<br>
+                                            아래 코드를 서비스 화면의 <strong style="color:#111827;">인증 코드 입력 란</strong>에 그대로 입력해 주세요.
+                                        </p>
+                                    </div>
+
+                                    <!-- 인증 코드 카드 -->
+                                    <div style="background:#f7f7f8;border:1px solid #e5e7eb;border-radius:12px;padding:32px;text-align:center;margin:24px 0;">
+                                        <div style="
+                                            font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;
+                                            font-size:32px;
+                                            font-weight:800;
+                                            letter-spacing:8px;
+                                            color:#111827;
+                                            background:#ffffff;
+                                            border:1px solid #d1d5db;
+                                            border-radius:8px;
+                                            padding:16px 24px;
+                                            display:inline-block;
+                                            min-width:240px;
+                                            box-shadow:0 1px 2px rgba(0,0,0,.04);">
+                                            <span th:text="${code}">123456</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 안내사항 -->
+                                    <div style="background:#f9fafb;border-left:4px solid #111827;padding:16px;margin:24px 0;">
+                                        <h3 style="margin:0 0 8px 0;font-size:14px;color:#111827;font-weight:600;">
+                                            도움말
+                                        </h3>
+                                        <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.6;">
+                                            코드가 일치하지 않거나 만료되면, 화면에서 <strong style="color:#111827;">코드 재전송</strong>을 눌러 새 코드를 받아주세요.
+                                        </p>
+                                    </div>
+
+                                    <!-- 복사용 평문 -->
+                                    <div style="margin:24px 0;">
+                                        <p style="margin:0;font-size:12px;color:#9ca3af;">
+                                            인증 코드(복사용):
+                                            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f3f4f6;padding:4px 8px;border-radius:4px;color:#111827;" th:text="${code}">123456</span>
+                                        </p>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 푸터 -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+                                    <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5;">
+                                        본 메일은 발송 전용입니다. 본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
