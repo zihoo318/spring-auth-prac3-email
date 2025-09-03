@@ -1,7 +1,7 @@
 # JWT Auth Tester (이메일 인증 확장)
 
 **Spring Security + JWT(Json Web Token)** 기반의 인증/인가 방식을 학습하고 테스트하기 위한 실습용 애플리케이션입니다.  
-기존 **spring-auth-prac2** 토큰 구조를 그대로 유지하면서, **이메일 인증 회원가입 절차**를 추가하여 보안을 강화했습니다.  
+기존 **spring-auth-prac2** 토큰 구조를 그대로 유지하면서, **이메일 인증 회원가입 절차**와 **회사 이메일 도메인 제한(화이트리스트)** 을 추가해 보안을 강화했습니다.  
 브라우저 UI에서 회원가입, 이메일 인증, 로그인, 토큰 재발급, 권한 검증 요청 등을 간단히 실행해볼 수 있습니다.
 
 ---
@@ -10,7 +10,7 @@
 - **Backend**: Spring Boot, Spring Security, JWT  
 - **Database**: MySQL  
 - **Frontend(UI)**: 단순 HTML/JS 페이지 (토큰/이메일 인증 테스트용)  
-- **Email Service**: JavaMailSender + Thymeleaf (MailHog 등 로컬 SMTP 연동)
+- **Email Service**: JavaMailSender + Thymeleaf (Google SMTP 사용)
 
 ---
 
@@ -18,7 +18,8 @@
 
 ### 화면
 - 통합 테스트 UI를 통해 회원가입, 로그인, 토큰 관리, 권한 검증을 손쉽게 수행  
-- 이메일 인증을 위해 코드 발송/검증 절차 포함  
+- 이메일 인증을 위해 **코드 발송/검증** 절차 포함  
+- **회사 도메인 이외 메일은 거절**되며, UI에 경고 모달 표시  
 
 <img width="1496" height="778" alt="image" src="https://github.com/user-attachments/assets/20f05933-61ad-415a-800b-607890148fa0" />
 <img width="469" height="176" alt="image" src="https://github.com/user-attachments/assets/7c0c0da1-9ecf-47f8-888a-3c047d7e1375" />
@@ -32,8 +33,12 @@
 - 가입 절차:
   1. **코드 발송** → 입력한 이메일로 6자리 인증 코드 전송  
   2. **코드 확인** → 입력값과 일치 시 이메일 검증 완료  
-  3. **회원가입(Signup)** 버튼으로 최종 가입 확정  
-- 이메일 도메인 화이트리스트 기능 제공 (`innogrid.com`, `example.com` 등)
+  3. **회원가입(Signup)** 버튼으로 최종 가입 확정
+  
+#### 회사 이메일 도메인 제한(화이트리스트)
+- 관리자가 허용한 도메인만 **코드 발송 및 회원가입** 가능  
+- 허용되지 않은 도메인일 경우 UI에 아래와 같은 경고가 표시되며 발송/가입이 차단됩니다.
+<img width="467" height="178" alt="허용되지 않은 도메인 모달" src="https://github.com/user-attachments/assets/7c963bc3-d5b5-4d72-a4be-e7a623f6efa7" />
 
 ---
 
