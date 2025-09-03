@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -30,6 +31,7 @@ public class AuthService {
         this.preRepo = preRepo;
     }
 
+    @Transactional // 회원가입 전체를 하나의 트랜잭션으로
     public UserEntity signUp(SignupRequest request){
         final String username = request.userName().trim();
         final String email    = request.email().trim().toLowerCase();

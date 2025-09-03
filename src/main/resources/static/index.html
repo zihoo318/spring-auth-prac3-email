@@ -148,15 +148,17 @@
 <script>
   let accessToken = null;
 
-  // 이메일 인증 상태 관리
+  // 이메일 인증 상태
   let emailVerified = false;
-  let verifiedEmail = null; // 인증 완료된 이메일 (프론트 기준)
+  let verifiedEmail = null;
 
   function setToken(token) {
     accessToken = token || null;
     const v = document.getElementById('tokenView');
     if (!accessToken) { v.textContent = '없음'; return; }
-    const short = accessToken.length > 30 ? accessToken.slice(0, 20) + ' ... ' + accessToken.slice(-10) : accessToken;
+    const short = accessToken.length > 30
+            ? accessToken.slice(0, 20) + ' ... ' + accessToken.slice(-10)
+            : accessToken;
     v.textContent = short;
   }
   function clearToken() { setToken(null); log('accessToken cleared'); }
@@ -174,7 +176,6 @@
   function setEmailVerified(ok, email) {
     emailVerified = !!ok;
     verifiedEmail = ok ? (email || verifiedEmail) : null;
-    // UI 반영
     const pill = document.getElementById('email-status');
     const btn  = document.getElementById('signup-btn');
     pill.textContent = ok ? '인증완료' : '미인증';
@@ -184,7 +185,7 @@
     if (ok && email) {
       const el = document.getElementById('su-email');
       el.value = email;
-      el.readOnly = true; // 인증된 이메일 보호(원하면 제거)
+      el.readOnly = true;
       el.style.background = '#f3f4f6';
     }
   }
@@ -197,11 +198,8 @@
     }
   }
 
-  // 이메일 입력 변경 시 인증 상태 초기화
   document.addEventListener('input', (e) => {
-    if (e.target && e.target.id === 'su-email') {
-      resetEmailVerificationIfChanged();
-    }
+    if (e.target && e.target.id === 'su-email') resetEmailVerificationIfChanged();
   });
 
   async function req(path, { method='GET', body=null, withAuth=false, withJson=true } = {}) {
@@ -212,7 +210,7 @@
       method,
       headers,
       body: body && withJson ? JSON.stringify(body) : body,
-      credentials: 'include', // 쿠키 전송/수신 (refresh에 필요)
+      credentials: 'include',
     });
     const ct = res.headers.get('content-type') || '';
     let data = null;
@@ -225,7 +223,7 @@
     return { res, data };
   }
 
-  // ===== 인증코드 발송 =====
+  // ===== 이메일 코드 발송 =====
   async function requestEmailCode() {
     const email = document.getElementById('su-email').value?.trim();
     if (!email) return showModal('이메일 입력', '인증코드 발송을 위해 이메일을 입력해주세요.');
@@ -238,118 +236,110 @@
     if (res.ok) {
       showModal('코드 발송 완료', '메일로 전송된 인증코드를 입력 후 "코드 확인"을 눌러주세요.');
     } else {
-      // 서버에서 받은 에러 메시지 문자열 정리
       const raw = typeof data === 'string' ? data : (data && data.error) || '';
       const textOnly = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-
-      // 허용되지 않은 도메인 전용 메시지
       if (res.status === 400 && textOnly.includes('허용되지 않은 이메일 도메인')) {
         showModal('허용되지 않은 도메인', '해당 이메일 도메인은 허용되지 않아 인증코드를 발송할 수 없습니다.');
       } else {
         showModal('코드 발송 실패', textOnly || '인증코드 발송에 실패했습니다.');
       }
     }
-
-    // ===== 인증코드 확인 =====
-    async function verifyEmailCode() {
-      const email = document.getElementById('su-email').value?.trim();
-      const code = document.getElementById('su-code').value?.trim();
-      if (!email || !code) return showModal('입력 필요', '이메일과 인증코드를 모두 입력해주세요.');
-
-      const {res, data} = await req('/auth/email/verify-code', {
-        method: 'POST',
-        body: {email, code}
-      });
-
-      // 200 OK면 성공 / 400이면 실패로 가정
-      if (res.ok) {
-        setEmailVerified(true, email);
-        showModal('인증 완료', '이메일 인증이 완료되었습니다. 회원가입을 진행할 수 있습니다.');
-      } else {
-        setEmailVerified(false, null);
-        showModal('인증 실패', typeof data === 'string' ? data : '코드가 올바르지 않거나 만료되었습니다.');
-      }
-    }
-
-    // ===== 회원가입 =====
-    async function signUp() {
-      // 인증 완료 체크
-      const username = document.getElementById('su-username').value?.trim();
-      const email = document.getElementById('su-email').value?.trim();
-      const password = document.getElementById('su-password').value;
-      const role = document.getElementById('su-role').value;
-
-      if (!username || !email || !password) {
-        return showModal('입력 필요', 'username / email / password 를 입력해주세요.');
-      }
-      if (!emailVerified || !verifiedEmail || email.toLowerCase() !== verifiedEmail.toLowerCase()) {
-        return showModal('이메일 인증 필요', '회원가입 전, 이메일 인증을 완료해주세요.');
-      }
-
-      const {res, data} = await req('/auth/sign-up', {
-        method: 'POST',
-        body: {userName: username, email, password, role}
-      });
-
-      if (res.ok) {
-        showModal('회원가입 완료', '회원가입이 완료되었습니다. 이제 로그인할 수 있습니다.');
-      } else {
-        showModal('회원가입 실패', typeof data === 'string' ? data : '회원가입에 실패했습니다.');
-      }
-    }
-
-    // ===== 로그인 / 토큰 =====
-    async function login() {
-      const username = document.getElementById('li-username').value?.trim();
-      const password = document.getElementById('li-password').value;
-      if (!username || !password) return log('로그인: username/password 입력');
-
-      const {res, data} = await req('/auth/login', {
-        method: 'POST',
-        body: {userName: username, password}
-      });
-
-      if (res.ok && data && data.accessToken) {
-        setToken(data.accessToken);
-        showModal('로그인 성공', 'accessToken이 저장되었습니다.');
-      } else {
-        showModal('로그인 실패', 'accessToken을 응답에서 찾지 못했습니다. LoginResponse 형식을 확인하세요.');
-      }
-    }
-
-    async function refresh() {
-      const {res, data} = await req('/auth/refresh', {method: 'POST'});
-      if (res.ok && data && data.accessToken) {
-        setToken(data.accessToken);
-        showModal('토큰 갱신', '새 accessToken 저장 완료 (refresh)');
-      } else {
-        showModal('갱신 실패', 'refresh 응답에 accessToken이 없습니다. 서버 응답 형식 확인.');
-      }
-    }
-
-    async function callUser() {
-      await req('/role/user', {method: 'POST', withAuth: true});
-    }
-
-    async function callAdmin() {
-      await req('/role/admin', {method: 'POST', withAuth: true});
-    }
-
-    // ===== 모달 =====
-    function showModal(title, message) {
-      document.getElementById('modal-title').textContent = title || '알림';
-      document.getElementById('modal-message').textContent = message || '';
-      document.getElementById('modal-backdrop').style.display = 'flex';
-    }
-
-    function hideModal() {
-      document.getElementById('modal-backdrop').style.display = 'none';
-    }
-
-    // 초기 표시
-    setToken(null);
-    log('페이지 로드 완료. BASE_URL을 확인하고 테스트하세요.');
   }
+
+  // ===== 이메일 코드 확인 =====
+  async function verifyEmailCode() {
+    const email = document.getElementById('su-email').value?.trim();
+    const code = document.getElementById('su-code').value?.trim();
+    if (!email || !code) return showModal('입력 필요', '이메일과 인증코드를 모두 입력해주세요.');
+
+    const {res, data} = await req('/auth/email/verify-code', {
+      method: 'POST',
+      body: {email, code}
+    });
+
+    if (res.ok) {
+      setEmailVerified(true, email);
+      showModal('인증 완료', '이메일 인증이 완료되었습니다. 회원가입을 진행할 수 있습니다.');
+    } else {
+      setEmailVerified(false, null);
+      showModal('인증 실패', typeof data === 'string' ? data : '코드가 올바르지 않거나 만료되었습니다.');
+    }
+  }
+
+  // ===== 회원가입 =====
+  async function signUp() {
+    const username = document.getElementById('su-username').value?.trim();
+    const email = document.getElementById('su-email').value?.trim();
+    const password = document.getElementById('su-password').value;
+    const role = document.getElementById('su-role').value;
+
+    if (!username || !email || !password) {
+      return showModal('입력 필요', 'username / email / password 를 입력해주세요.');
+    }
+    if (!emailVerified || !verifiedEmail || email.toLowerCase() !== verifiedEmail.toLowerCase()) {
+      return showModal('이메일 인증 필요', '회원가입 전, 이메일 인증을 완료해주세요.');
+    }
+
+    const {res, data} = await req('/auth/sign-up', {
+      method: 'POST',
+      body: {userName: username, email, password, role}
+    });
+
+    if (res.ok) {
+      showModal('회원가입 완료', '회원가입이 완료되었습니다. 이제 로그인할 수 있습니다.');
+    } else {
+      showModal('회원가입 실패', typeof data === 'string' ? data : '회원가입에 실패했습니다.');
+    }
+  }
+
+  // ===== 로그인 / 토큰 =====
+  async function login() {
+    const username = document.getElementById('li-username').value?.trim();
+    const password = document.getElementById('li-password').value;
+    if (!username || !password) return log('로그인: username/password 입력');
+
+    const {res, data} = await req('/auth/login', {
+      method: 'POST',
+      body: {userName: username, password}
+    });
+
+    if (res.ok && data && data.accessToken) {
+      setToken(data.accessToken);
+      showModal('로그인 성공', 'accessToken이 저장되었습니다.');
+    } else {
+      showModal('로그인 실패', 'accessToken을 응답에서 찾지 못했습니다. LoginResponse 형식을 확인하세요.');
+    }
+  }
+
+  async function refresh() {
+    const {res, data} = await req('/auth/refresh', {method: 'POST'});
+    if (res.ok && data && data.accessToken) {
+      setToken(data.accessToken);
+      showModal('토큰 갱신', '새 accessToken 저장 완료 (refresh)');
+    } else {
+      showModal('갱신 실패', 'refresh 응답에 accessToken이 없습니다. 서버 응답 형식 확인.');
+    }
+  }
+
+  async function callUser() { await req('/role/user', {method: 'POST', withAuth: true}); }
+  async function callAdmin() { await req('/role/admin', {method: 'POST', withAuth: true}); }
+
+  // ===== 모달 =====
+  function showModal(title, message) {
+    document.getElementById('modal-title').textContent = title || '알림';
+    document.getElementById('modal-message').textContent = message || '';
+    document.getElementById('modal-backdrop').style.display = 'flex';
+  }
+  function hideModal() {
+    document.getElementById('modal-backdrop').style.display = 'none';
+  }
+
+  // 초기화
+  setToken(null);
+  log('페이지 로드 완료. BASE_URL을 확인하고 테스트하세요.');
+
+  // 전역 노출이 필요하면 아래 줄 추가
+  window.hideModal = hideModal; window.showModal = showModal;
 </script>
 </body>
 </html>

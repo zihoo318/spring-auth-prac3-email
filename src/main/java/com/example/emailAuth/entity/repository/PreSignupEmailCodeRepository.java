@@ -2,6 +2,9 @@ package com.example.emailAuth.entity.repository;
 
 import com.example.emailAuth.entity.PreSignupEmailCode;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -14,5 +17,7 @@ public interface PreSignupEmailCodeRepository extends JpaRepository<PreSignupEma
     boolean existsByEmailAndVerifiedAtAfter(String email, Instant after);
 
     // 가입 완료 후 깨끗이 정리
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
     void deleteByEmail(String email);
 }
