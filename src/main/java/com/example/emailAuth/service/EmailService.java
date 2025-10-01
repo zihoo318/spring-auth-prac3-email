@@ -40,6 +40,7 @@ public class EmailService {
         String code = emailUtil.generateNumericCode(6); // ex) 6자리 숫자
         String codeHash = passwordEncoder.encode(code);
 
+        // 인증번호 db에 저장
         PreSignupEmailCode rec = new PreSignupEmailCode();
         rec.setEmail(email);
         rec.setCodeHash(codeHash);

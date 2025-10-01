@@ -39,7 +39,7 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString()) // Refresh 토큰은 쿠키에 Set-Cookie 헤더로 전달
                 .body(new LoginResponse(token.accessToken(), null, "두 토큰 모두 재발급"));
     }
 
