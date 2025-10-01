@@ -26,7 +26,7 @@ public class EmailService {
     private final PreSignupEmailCodeRepository preRepo;
     private final EmailProperties emailProperties;
     private final EmailUtil emailUtil;
-    private final JavaMailSender mailSender;
+    private final JavaMailSender mailSender; // Spring이 감싸준 메일 전송기 인터페이스 (Jakarta Mail 라이브러리로 smtp랑 통신)
     private final TemplateEngine templateEngine; // Thymeleaf
     private final PasswordEncoder passwordEncoder;     // code 해시 저장용
 
@@ -59,7 +59,7 @@ public class EmailService {
         // 템플릿
         String html = templateEngine.process("emailTemplates", ctx);
 
-        MimeMessage mime = mailSender.createMimeMessage();
+        MimeMessage mime = mailSender.createMimeMessage(); // 보낼 이메일 껍데기(객체) 생성
         MimeMessageHelper h = new MimeMessageHelper(mime, true, "UTF-8");
         h.setTo(to);
         h.setSubject("이메일 인증 코드 안내");
